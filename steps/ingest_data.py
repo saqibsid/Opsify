@@ -9,7 +9,7 @@ class IngestData:
     """
     def __init__(self,data_path : str):
         """
-        initilaising the data_path
+        initialising the data_path
 
         Args:
             data_path : path to the data

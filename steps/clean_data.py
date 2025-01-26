@@ -9,8 +9,8 @@ from sklearn.model_selection import train_test_split
 def cleaning_data(df:pd.DataFrame) -> Tuple[
     Annotated[pd.DataFrame,"X_train"],
     Annotated[pd.DataFrame,"y_train"],
-    Annotated[pd.DataFrame,"X_test"],
-    Annotated[pd.DataFrame,"y_test"]
+    Annotated[pd.Series,"X_test"],
+    Annotated[pd.Series,"y_test"]
 ]:
     """
     takes input as ingested data and cleans it and return the divided data
@@ -24,15 +24,16 @@ def cleaning_data(df:pd.DataFrame) -> Tuple[
         y_test : testing labels
     """
     try:
-        cleaned_data = PreProcessingData(df)
+        cleaned_data = PreProcessingData(data=df)
         X_train, X_test, y_train, y_test = DivideData(cleaned_data)
         logging.info("Data cleaned completed!")
+        return X_train,X_test,y_train,y_test
     except Exception as e:
         logging.error(f"Error in cleaning data {e}")
         raise e
 
 
-def PreProcessingData(self, data:pd.DataFrame) -> Union[pd.DataFrame,pd.Series]:
+def PreProcessingData(data:pd.DataFrame) -> pd.DataFrame:
     """
     function to preprocess the data
     """
@@ -63,15 +64,19 @@ def PreProcessingData(self, data:pd.DataFrame) -> Union[pd.DataFrame,pd.Series]:
         logging.error(f"Error while Preprocessing the data {e}")
         raise e
     
-def DivideData(self,data:pd.DataFrame) -> Union[pd.DataFrame,pd.Series]:
+def DivideData(data:pd.DataFrame) -> Tuple[
+    Annotated[pd.DataFrame,"X_train"],
+    Annotated[pd.DataFrame,"X_test"],
+    Annotated[pd.Series,"y_train"],
+    Annotated[pd.Series,"y_test"]]:
     """
     defining the independent and target variable.
     """
     try:
-        X = data.drop(data["review_score"],axis=1)
+        X = data.drop("review_score",axis=1)
         y = data["review_score"]
-        X_train, y_train, X_test, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
-        return X_train, y_train, X_test, y_test
+        X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,random_state=42)
+        return X_train, X_test, y_train, y_test
     except Exception as e:
         logging.error(f"Error while dividing the data {e}")
         raise e

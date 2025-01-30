@@ -20,8 +20,8 @@ class IngestData:
         """
         Ingesting the data from data_path
         """
-        logging.info(f"Ingesting data from {self.datapath}")
-        return pd.read_csv(self.datapath)
+        logging.info(f"Ingesting data from {self.data_path}")
+        return pd.read_csv(self.data_path)
     
 # calling the class in a pipeline step
 @step

@@ -7,7 +7,7 @@ from .config import ModelNameConfig
 
 import mlflow
 from zenml.client import Client # allows access to backend to manage artifacts, track experiments etc..
-
+import xgboost as xgb
 
 experiment_tracker = Client().active_stack.experiment_tracker # connect with backend and get the active artifacts
 
@@ -36,8 +36,12 @@ def model_training(X_train : pd.DataFrame,
             mlflow.sklearn.autolog()
             model = LinearRegressionModel(X_train,y_train)
             return model
+        elif config.model_name == "XGBoostRegressor":
+            mlflow.sklearn.autolog()
+            model = XGBoostRegressor(X_train,y_train)
+            return model
         else:
-             raise ValueError(f"model {config.model_name} is not supported")
+             raise ValueError(f"model {config.model_name} is not supported") 
     except Exception as e:
         logging.error(f"Error while training the model {e}")
         raise e
@@ -50,6 +54,15 @@ def LinearRegressionModel(X_train,y_train,**kwargs):
         reg.fit(X_train,y_train)
         logging.info("Model training completed!")
         return reg
+    except Exception as e:
+        logging.error(f"Error while training the model {e}")
+        raise e
+    
+def XGBoostRegressor(X_train,y_train,**kwargs):
+    try:
+        xgboost_regressor = xgb.XGBRegressor(**kwargs)
+        xgboost_regressor.fit(X_train,y_train)
+        return xgboost_regressor
     except Exception as e:
         logging.error(f"Error while training the model {e}")
         raise e

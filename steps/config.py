@@ -2,4 +2,4 @@
 from pydantic import BaseModel
 
 class ModelNameConfig(BaseModel):
-    model_name: str = "LinearRegression"
+    model_name: str = "XGBoostRegressor"

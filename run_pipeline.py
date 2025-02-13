@@ -1,15 +1,17 @@
 from zenml.client import Client
-from zenml import pipeline
+import mlflow.sklearn
+import os
 import logging
 import pandas as pd
-from zenml import step
 import numpy as np
-from typing import Union, Annotated, Tuple
+from typing import Annotated, Tuple
 from sklearn.model_selection import train_test_split
 import mlflow
 from sklearn.linear_model import LinearRegression
 from sklearn.base import RegressorMixin
-from sklearn.metrics import mean_squared_error, r2_score, root_mean_squared_error
+from sklearn.metrics import r2_score, root_mean_squared_error
+import xgboost as xg
+import pickle
 
 # ingesting data
 def ingest_df(datapath:str) -> pd.DataFrame:
@@ -28,6 +30,7 @@ def ingest_df(datapath:str) -> pd.DataFrame:
         logging.error(f"Error while ingesting data {e}")
         raise e
 
+# cleaning and preprocessing data
 def cleaning_data(data:pd.DataFrame) -> Tuple[
     Annotated[pd.DataFrame,"X_train"],
     Annotated[pd.DataFrame,"y_train"],
@@ -84,6 +87,7 @@ def cleaning_data(data:pd.DataFrame) -> Tuple[
         logging.error(f"Error in cleaning data {e}")
         raise e
 
+# training the data
 def model_training(X_train : pd.DataFrame,
                    y_train : pd.DataFrame,
                    model_name: str) -> RegressorMixin:
@@ -101,18 +105,38 @@ def model_training(X_train : pd.DataFrame,
         trained_model : model trained on data
     """
     try:
+        model = None
+        mlflow.sklearn.autolog()
         if model_name == "LinearRegression":
             mlflow.sklearn.autolog()
-            reg = LinearRegression()
-            reg.fit(X_train,y_train)
-            logging.info("Model training completed!")
-            return reg
+            model = LinearRegression()
+        elif model_name == "XGBoostRegressor":
+            mlflow.sklearn.autolog()
+            model = xg.XGBRegressor(n_estimators=500, max_depth=6, learning_rate=0.05)
         else:
              raise ValueError(f"model {model_name} is not supported") 
+        
+        with mlflow.start_run():
+            model.fit(X_train,y_train)
+            logging.info(f"{model_name} training completed!")
+
+            mlflow.sklearn.log_model(model,model_name)
+            logging.info(f"{model_name} logged into mlflow!")
+
+        model_filename = f"{model_name}.pkl"
+        filename = os.path.join("models/",model_filename)
+
+        with open(filename,'wb') as f:
+            pickle.dump(model,f)
+
+        logging.info("Model saved as a pickle file")
+        return model
+    
     except Exception as e:
         logging.error(f"Error while training the model {e}")
         raise e
 
+# evaluating the results
 def evaluate(model:RegressorMixin,
              X_test : pd.DataFrame,
              y_test : pd.DataFrame)-> Tuple[
@@ -132,13 +156,15 @@ def evaluate(model:RegressorMixin,
         logging.error(f"Error while evaluating scores {e}")
         raise e
 
+# training the pipeline
 def training_pipelines(data_path:str):
     df = ingest_df(data_path)
     X_train, X_test, y_train, y_test = cleaning_data(df)
 
-    trained_model = model_training(X_train, y_train,model_name="LinearRegression")
+    trained_model = model_training(X_train, y_train,model_name="XGBoostRegressor")
     r2,rmse = evaluate(trained_model,X_test,y_test)
 
+# running the pipeline
 if __name__ == "__main__":
     print(Client().active_stack.experiment_tracker.get_tracking_uri())
     training_pipelines(data_path='data/olist_customers_dataset.csv')

@@ -8,7 +8,7 @@ import pandas as pd
 from zenml import pipeline, step
 from zenml.config import DockerSettings
 from zenml.constants import DEFAULT_SERVICE_START_STOP_TIMEOUT
-from zenml.integrations.constants import MLFLOW, TENSORFLOW
+from zenml.integrations.constants import MLFLOW
 from zenml.integrations.mlflow.model_deployers.mlflow_model_deployer import (
     MLFlowModelDeployer,
 )
@@ -23,7 +23,7 @@ from pydantic import BaseModel
 from steps.config import ModelNameConfig
 from steps.clean_data import PreProcessingData
 
-docker_settings = DockerSettings(required_integrations=[MLFLOW]) # ensure that the pipeline is run inside a docker container
+docker_settings = DockerSettings(required_integrations=[MLFLOW]) # ensure that the pipeline runs inside a docker container
 
 class DeploymentTriggerConfig(BaseModel): # change here to pydantic
     """Parameters that are used to trigger the deployment"""
@@ -70,7 +70,6 @@ def prediction_service_loader(
     """
     # get active component from stack
     mlflow_model_deployer_component = MLFlowModelDeployer.get_active_model_deployer()
-
     # fetch existing serice with same pipeline name, step_name, and model name
     existing_services = mlflow_model_deployer_component.find_model_server(
         pipeline_name=pipeline_name,
@@ -93,7 +92,7 @@ def deployment_trigger(
     accuracy: float,
     config: DeploymentTriggerConfig
 ) -> bool:
-    return accuracy >= config.min_accuracy
+    return accuracy > config.min_accuracy
 
 #predictor pipeline
 @step(enable_cache=False)
@@ -118,13 +117,15 @@ def predictor(
         "product_length_cm",
         "product_height_cm",
         "product_width_cm",
+        "product_volume",
+        "product_density",
+        "price_per_volume",
     ]
     df = pd.DataFrame(data['data'],columns=columns_for_df)
-    json_list = json.loads(json.dumps(list(df.T.to_dict().values)))
+    json_list = json.loads(json.dumps(list(df.T.to_dict().values())))
     data = np.array(json_list)
     prediction = service.predict(data)
     return prediction
-
 
 @pipeline(enable_cache=False, settings={"docker":docker_settings})
 def continuous_deployment_pipeline(
@@ -136,11 +137,11 @@ def continuous_deployment_pipeline(
     df = ingest_df(datapath = "./data/processed_olist_customer_dataset.csv")
     X_train, X_test, y_train, y_test = cleaning_data(df)
 
-    config = ModelNameConfig(model_name="XGBoostRegressor")
+    config = ModelNameConfig(model_name="LinearRegression")
     model = model_training(X_train, X_test, y_train, y_test,config)
     r2,rmse = evaluate(model,X_test,y_test)
     # decision to check if model to be deployed or not
-    deployment_decision = deployment_decision = deployment_trigger(accuracy=r2, config=DeploymentTriggerConfig(min_accuracy=min_accuracy))
+    deployment_decision = deployment_trigger(accuracy=r2, config=DeploymentTriggerConfig(min_accuracy=min_accuracy))
 
     # if condition is met
     mlflow_model_deployer_step(
@@ -162,10 +163,9 @@ def inference_pipeline(pipeline_name: str, pipeline_step_name: str):
     prediction = predictor(service=service, data=data)
     return prediction
 
-
 def get_data_for_test():
     try:
-        df = pd.read_csv("./data/processed_olist_customer_dataset.csv")
+        df = pd.read_csv("./data/olist_customers_dataset.csv")
         df = df.sample(n=100)
         df = PreProcessingData(df)
         df.drop(["review_score"],axis=1,inplace=True)

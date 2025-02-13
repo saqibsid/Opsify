@@ -7,10 +7,9 @@ from zenml.integrations.mlflow.mlflow_utils import get_tracking_uri
 from typing import cast
 from zenml.integrations.mlflow.services import MLFlowDeploymentService
 from pydantic import BaseModel
-from steps.config import ModelNameConfig
+# from steps.config import ModelNameConfig
 
 BaseModel.model_config = {'protected_namespaces': ()}
-
 
 DEPLOY = "deploy"
 PREDICT = 'predict'
@@ -45,7 +44,7 @@ def run_deployment(config: str, min_accuracy: float):
             timeout=60)
     if predict:
         inference_pipeline(
-            pipeline_name = continuous_deployment_pipeline,
+            pipeline_name = "continuous_deployment_pipeline",
             pipeline_step_name = "mlflow_model_deployer_step",
         )
 
@@ -88,5 +87,6 @@ def run_deployment(config: str, min_accuracy: float):
             "pipeline must run first to train a model and deploy it. Execute "
             "the same command with the `--deploy` argument to deploy a model."
         )
+        
 if __name__ == "__main__":
     run_deployment()

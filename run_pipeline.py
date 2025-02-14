@@ -82,6 +82,8 @@ def cleaning_data(data:pd.DataFrame) -> Tuple[
         print("asdasd",X_test.shape)
         print("asdasd",y_train.shape)
         print("asdasd",y_test.shape)
+
+        print("X_train features: ",X_train.columns)
         return X_train,X_test,y_train,y_test
     except Exception as e:
         logging.error(f"Error in cleaning data {e}")

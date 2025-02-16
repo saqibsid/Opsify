@@ -18,11 +18,11 @@ This project aims to predict customer review scores using machine learning while
 
 ## Dataset Description
 
-The dataset used in this project is the [**Brazilian E-Commerce Public Dataset by Olist**](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce/data?select=olist_customers_dataset.csv), sourced from **Kaggle**. It contains **100,000+ orders** made between **2016 and 2018** across multiple online marketplaces in Brazil. The dataset provides a comprehensive view of e-commerce transactions, including **order details, product attributes, customer information, payment data, delivery performance, and customer reviews**. The review scores, given by customers after receiving their orders, serve as the target variable for this machine learning model.
+The dataset used in this project is the [**Brazilian E-Commerce Public Dataset by Olist**](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce/data?select=olist_customers_dataset.csv), sourced from **Kaggle**. It contains **100,000+ orders** made between 2016 and 2018 across multiple online marketplaces in Brazil. The dataset provides a comprehensive view of e-commerce transactions. The review scores, given by customers after receiving their orders, serve as the target variable for this machine learning model.
 
 ## Solution
 
-This project leverages **machine learning** to predict customer review scores based on product and order attributes. A **FastAPI server** is built to serve real-time predictions, which is **containerized using Docker** and **deployed on the cloud** for scalability. By following **MLOps best practices**, the solution ensures efficient model deployment, automation, and monitoring, making it robust and production-ready.
+This project aims to predict customer review scores based on product and order attributes. A **FastAPI server** is built to serve real-time predictions, which is **containerized using Docker** and **deployed on the cloud** for scalability. By following **MLOps best practices**, the solution ensures efficient model deployment, automation, and monitoring, making it robust and production-ready.
 
 ## Training Pipeline
 The standard training pipeline consists of several steps:

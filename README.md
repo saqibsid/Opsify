@@ -30,5 +30,5 @@ The standard training pipeline consists of several steps:
 * `ingest_data`: This step will ingest the data and create a DataFrame.
 * `clean_data`: This step will clean the data and remove the unwanted columns.
 * `train_model`: This step will train the model and save the model using MLflow autologging.
-* `evaluation`: This step will evaluate the model and save the metrics -- using MLflow autologging -- into the artifact store.
+* `evaluation`: This step will evaluate the model and save the metrics -- using [MLflow autologging](https://www.mlflow.org/docs/latest/tracking.html)
 

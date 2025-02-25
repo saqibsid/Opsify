@@ -4,3 +4,4 @@ src/
 **/__pycache__/
 data/
 mlruns/
+GCP_apihosting_steps.txt

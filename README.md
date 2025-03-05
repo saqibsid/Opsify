@@ -4,7 +4,7 @@
 This project is designed to predict product review scores based on product descriptions. It follows MLOps best practices, leveraging MLflow for experiment tracking, FastAPI for building a prediction server, and Docker for containerizing the API. The deployment is handled using Google Cloud Run.
 
 ## Problem Statement
-customer reviews play a crucial role in influencing purchasing decisions. However, many products receive limited or no reviews, making it difficult to assess their quality. 
+Customer reviews play a crucial role in influencing purchasing decisions. However, many products receive limited or no reviews, making it difficult to assess their quality. 
 This project aims to bridge that gap by predicting product review scores based on product descriptions. By leveraging machine learning and MLOps best practices, this solution enables businesses to estimate customer sentiment even before reviews are posted. 
 
 ## Objective
@@ -22,7 +22,7 @@ The training pipeline consists of the following steps:
 * `evaluation` – Evaluates the model and logs performance metrics to the artifact store via MLflow autologging.
 
 ## Deployment
-The API container was deployed to Google Cloud Run, providing a fully managed and scalable serverless deployment. Using Docker, the FastAPI application was containerized, ensuring portability and efficient execution. Google Cloud Run automatically scales based on demand, ensuring high availability while reducing infrastructure management overhead, making the prediction service reliable and cost-effective.
+The API container was deployed to Google Cloud Run.Then by leveraging Docker, the FastAPI application was containerized. Google Cloud Run automatically scales based on demand, ensuring high availability while reducing infrastructure management overhead, making the prediction service reliable and cost-effective.
 You can access the API prediction [here](https://mlops-project-api-v2-36719627723.us-central1.run.app/docs)
 
 ## Future Work

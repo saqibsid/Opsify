@@ -16,10 +16,10 @@ The dataset used in this project is [Brazilian E-Commerce Public Dataset by Olis
 ## Standard Training Pipeline
 The training pipeline consists of the following steps:
 
-`ingest_data` – Loads the dataset and creates a DataFrame.
-`clean_data` – Cleans the data by handling missing values and removing unnecessary columns.
-`train_model` – Trains the model and logs it using MLflow autologging.
-`evaluation` – Evaluates the model and logs performance metrics to the artifact store via MLflow autologging.
+* `ingest_data` – Loads the dataset and creates a DataFrame.
+* `clean_data` – Cleans the data by handling missing values and removing unnecessary columns.
+* `train_model` – Trains the model and logs it using MLflow autologging.
+* `evaluation` – Evaluates the model and logs performance metrics to the artifact store via MLflow autologging.
 
 ## Deployment
 The API container was deployed to Google Cloud Run, providing a fully managed and scalable serverless deployment. Using Docker, the FastAPI application was containerized, ensuring portability and efficient execution. Google Cloud Run automatically scales based on demand, ensuring high availability while reducing infrastructure management overhead, making the prediction service reliable and cost-effective.

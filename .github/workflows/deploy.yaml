@@ -1,3 +1,76 @@
 name: MLops Pipeline Deploy
 
+env:
+  SERVICE_NAME: mlops-project-api
+  PROJECT_ID: mlops-pipeline-project-451210
+  DOCKER_IMAGE_URL:  us-central1-docker.pkg.dev/mlops-pipeline-project-451210/my-repo/mlops-project-pipeline
 
+on:
+  push:
+    branches:
+      -main # if changes made in main branch then trigger the workflow
+  
+  pull_request:
+    branches:
+      -main
+
+jobs:
+  train_model:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.9
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies
+        run: |
+          python run_pipeline.py
+          mkdir -p models/
+          mv XGBoostRegressor.pkl models/XGBoostRegressor.pkl
+
+      - name: Upload Model artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained_model
+          path: models/XGBoostRegressor.pkl
+        
+  dockerise_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Google Cloud Auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+          project_id: '${{ secrets.GCP_PROJECT_ID }}'
+
+      - name: Setup Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+
+      - name: Configure Docker
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile.prod .
+          docker push ${{ env.DOCKER_IMAGE_URL }}:latest
+
+
+      - name: Deploy to Google Cloud Run
+        run: |
+          echo SERVICE_NAME $SERVICE_NAME
+          gcloud run deploy $SERVICE_NAME \
+            --image ${{ env.DOCKER_IMAGE_URL }}:latest \
+            --platform managed
+            --region ${{ secrets.GCP_REGION }}
+            --allow-unauthenticated
+       

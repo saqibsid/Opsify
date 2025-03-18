@@ -8,11 +8,11 @@ env:
 on:
   push:
     branches:
-      -main # if changes made in main branch then trigger the workflow
+      - main # if changes made in main branch then trigger the workflow
   
   pull_request:
     branches:
-      -main
+      - main
 
 jobs:
   train_model:
@@ -20,10 +20,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Setup Python 3.9
-      - uses: actions/setup-python@v4
+        uses: actions/setup-python@v4 # put - only when linked to the previous step
         with:
           python-version: "3.9"
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile.prod .
+          docker build -t ${{ env.DOCKER_IMAGE_URL }}:latest -f Dockerfile .     
           docker push ${{ env.DOCKER_IMAGE_URL }}:latest
 
 
@@ -70,7 +70,7 @@ jobs:
           echo SERVICE_NAME $SERVICE_NAME
           gcloud run deploy $SERVICE_NAME \
             --image ${{ env.DOCKER_IMAGE_URL }}:latest \
-            --platform managed
-            --region ${{ secrets.GCP_REGION }}
+            --platform managed \
+            --region ${{ secrets.GCP_REGION }} \
             --allow-unauthenticated
        
